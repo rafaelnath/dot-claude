@@ -25,6 +25,7 @@ For a plan part (small tasks have no plan file):
 ## Pre-review gate
 Before review, check the part against its plan entry (for a small task: the scope boundary and "done when" stated at triage; for the user's own changes: their changed files, and the build plus relevant tests). Both results go in the PR description:
 - Every changed file must be inside its scope boundary. Explain or revert any that aren't.
+- Every changed line must trace to the request. Don't improve adjacent code, comments or formatting, or refactor what isn't broken. Remove imports, variables and functions your change made unused; mention unrelated dead code instead of deleting it.
 - Its "done when" check must pass. Pre-existing failures (see Ask vs decide in SKILL.md) don't block it.
 
 ## Review loop
@@ -62,7 +63,7 @@ Conventional Commits: `<type>(<scope>): <summary>`
 Push the branch and open a PR targeting the branch it was created from. Never merge it; the user reviews and merges. The PR description has these sections, omitting any that are empty (for a bundled PR, give the scope check and done-when result per part):
 - **Scope check:** changed files, all inside the boundary, or explained
 - **Done when:** the command and its result
-- **Decisions made**
+- **Decisions made:** notable implementation choices (e.g. reused `SkuValidator` instead of adding a new check)
 - **Open findings:** critical or important findings the user accepted
 - **Minor findings:** for the user to decide on
 - **Pre-existing failures**

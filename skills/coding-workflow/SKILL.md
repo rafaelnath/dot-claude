@@ -9,7 +9,7 @@ A question gets an answer and a stop; an instruction ("fix X") is the go-ahead. 
 
 ## Triage
 
-Decide plan or no plan. For bugs, find the root cause first (read-only), then triage; if it can't be found, stop and report instead of guess-fixing.
+Decide plan or no plan. For bugs, find the root cause first (read-only), then triage; if it can't be found, stop and report instead of guess-fixing. If a simpler approach exists, say so; push back when warranted.
 
 **Execute immediately** only if all of these hold:
 - 3 files or fewer, and about 100 changed lines or fewer. Exclude test files from both counts.
@@ -21,6 +21,8 @@ Decide plan or no plan. For bugs, find the root cause first (read-only), then tr
 If it qualifies:
 1. State a scope boundary (the files you expect to change) and a "done when" check, like a one-part plan entry.
 2. Read [execution.md](execution.md) and follow it from Branch to PR.
+
+A good "done when" fails before the change and passes after it: for a bug, a test that reproduces it; for a feature, tests for its behavior, including invalid inputs; for a refactor, the existing tests passing before and after. "It compiles" isn't one.
 
 If, during the work, any criterion turns out to be broken, stop, report what's done so far and leave it uncommitted, then plan from there. The user decides whether to keep or discard the partial work.
 
@@ -41,8 +43,8 @@ When the user asks to address feedback on an open PR, check out its branch, read
 ## Ask vs decide
 
 - During planning, always ask.
-- During execution of an approved part, decide small ambiguities yourself and record them under "Decisions made" in the PR description.
-- Stop and ask only if the answer would change the part's scope, approach, or interfaces.
+- During execution, if the request or plan can be read more than one way (different behavior), stop, present the readings, and ask. Don't pick silently. If several come up at once, ask them together.
+- Implementation details that don't change behavior (naming, internal structure, following existing patterns) aren't interpretations: decide them, matching the existing code.
 - If a check fails in a test or code the part didn't touch, run that test on the base branch (the branch the part was created from) in a temporary worktree (`git worktree add --detach <temp-dir> <base-branch>`, removed afterwards with `git worktree remove`) before fixing it. If it fails there too, it's a pre-existing failure: don't fix it, don't let it block the gate or commits, and record it under "Pre-existing failures" in the PR.
 
 ## Hard stops
