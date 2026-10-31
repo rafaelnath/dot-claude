@@ -1,6 +1,6 @@
 ---
 name: coding-workflow
-description: The user's required workflow for any code change in a repo — fixing bugs, adding features, refactoring, or otherwise editing code — and for planning work, executing plan parts, committing, pushing, and opening PRs. Use it before making any code change, even a one-line fix. Not needed for questions about code that don't ask for a change.
+description: The user's required workflow for any code change in a repo — fixing bugs, adding features, refactoring, or otherwise editing code — and for planning code work in a repo, executing plan parts, committing, pushing, and opening PRs. Use it before making any code change, even a one-line fix. Not needed for questions about code that don't ask for a change.
 ---
 
 # Coding workflow
@@ -19,9 +19,8 @@ Decide plan or no plan. For bugs, find the root cause first (read-only), then tr
 - one reasonable reading of the request and one reasonable approach, each statable in one sentence
 
 If it qualifies:
-1. State a one-line scope and a "done when" check.
-2. Implement it and run the check, without committing.
-3. Ask whether to finish it fully (branch, review loop, commit/push, PR), skip all of that, or pick some steps. For the steps chosen, follow [execution.md](execution.md).
+1. State a scope boundary (the files you expect to change) and a "done when" check, like a one-part plan entry.
+2. Read [execution.md](execution.md) and follow it from Branch to PR.
 
 If, during the work, any criterion turns out to be broken, stop, report what's done so far and leave it uncommitted, then plan from there. The user decides whether to keep or discard the partial work.
 
@@ -31,12 +30,20 @@ Otherwise, plan first: read [planning.md](planning.md).
 
 Before starting any plan part, read [execution.md](execution.md). Start a part only when the user names it.
 
+## Committing the user's own changes
+
+When the user asks to commit, push, or open a PR for changes they made themselves, skip triage. Their changed files are the scope boundary, and "done when" is the build and relevant tests passing. Read [execution.md](execution.md) and follow it from Branch, skipping implement. The uncommitted-changes check before branching doesn't apply to these changes.
+
+## Feedback on an open PR
+
+When the user asks to address feedback on an open PR, check out its branch, read [execution.md](execution.md) and follow "After the PR is open" under Commits, then push. Don't create a new branch or PR.
+
 ## Ask vs decide
 
 - During planning, always ask.
 - During execution of an approved part, decide small ambiguities yourself and record them under "Decisions made" in the PR description.
 - Stop and ask only if the answer would change the part's scope, approach, or interfaces.
-- If a check fails in a test or code the part didn't touch, run that test on the base branch in a temporary worktree (`git worktree add <temp-dir> <base-branch>`, removed afterwards with `git worktree remove`) before fixing it. If it fails there too, it's a pre-existing failure: don't fix it, don't let it block the gate or commits, and record it under "Pre-existing failures" in the PR.
+- If a check fails in a test or code the part didn't touch, run that test on the base branch (the branch the part was created from) in a temporary worktree (`git worktree add --detach <temp-dir> <base-branch>`, removed afterwards with `git worktree remove`) before fixing it. If it fails there too, it's a pre-existing failure: don't fix it, don't let it block the gate or commits, and record it under "Pre-existing failures" in the PR.
 
 ## Hard stops
 

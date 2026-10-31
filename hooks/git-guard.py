@@ -75,12 +75,26 @@ def check_command(command, cwd):
         if not seg:
             continue
         prog = os.path.basename(seg[0])
-        if prog in SHELLS and len(seg) >= 3 and seg[1] == "-c":
+        if prog in ("cd", "pushd"):
+            cwd = resolve_dir(cwd, seg[1:])
+        elif prog in SHELLS and len(seg) >= 3 and seg[1] == "-c":
             check_command(seg[2], cwd)
         elif prog == "git":
             check_git(seg[1:], cwd)
         elif prog == "gh":
             check_gh(seg[1:])
+
+
+def resolve_dir(cwd, target):
+    """Follow cd/pushd/-C so commits check the right repo; None when the target isn't a literal path."""
+    if isinstance(target, list):
+        args = [a for a in target if a not in ("-L", "-P")]
+        if not args:
+            return os.path.expanduser("~")
+        target = args[0]
+    if cwd is None or target == "-" or "$" in target or "`" in target:
+        return None
+    return os.path.join(cwd, os.path.expanduser(target))
 
 
 def check_gh(args):
@@ -95,7 +109,7 @@ def check_git(args, cwd):
         opt = args[i]
         if opt in GIT_OPTS_WITH_VALUE:
             if opt == "-C" and i + 1 < len(args):
-                cwd = os.path.join(cwd, os.path.expanduser(args[i + 1]))
+                cwd = resolve_dir(cwd, args[i + 1])
             i += 2
         else:
             i += 1
@@ -170,6 +184,9 @@ def check_commit(args, cwd):
 
 
 def check_branch(cwd):
+    if cwd is None:
+        raise Blocked("can't tell which repo this commit runs in (cd or -C target isn't a literal path); "
+                      "use a literal path.")
     result = subprocess.run(["git", "-C", cwd, "symbolic-ref", "--short", "-q", "HEAD"],
                             capture_output=True, text=True)
     branch = result.stdout.strip()

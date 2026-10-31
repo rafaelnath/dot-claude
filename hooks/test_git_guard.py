@@ -66,6 +66,18 @@ class GitGuardTest(unittest.TestCase):
         self.assertBlocked(f'git -C {self.main} commit -m "fix(receipt): handle null sku"', cwd=self.work,
                            contains="'main'")
 
+    def test_commit_after_cd_checks_target_repo(self):
+        msg = '"fix(receipt): handle null sku"'
+        self.assertBlocked(f"cd {self.main} && git commit -m {msg}", cwd=self.work, contains="'main'")
+        self.assertBlocked(f"bash -c 'cd {self.main} && git commit -m {msg}'", cwd=self.work, contains="'main'")
+        self.assertAllowed(f"cd {self.work} && git commit -m {msg}", cwd=self.main)
+
+    def test_commit_with_unresolved_dir_blocked(self):
+        msg = '"fix(receipt): handle null sku"'
+        for cmd in [f"cd $REPO && git commit -m {msg}", f"git -C $REPO commit -m {msg}",
+                    f"cd - && git commit -m {msg}"]:
+            self.assertBlocked(cmd, contains="can't tell which repo")
+
     def test_commit_outside_repo_blocked(self):
         self.assertBlocked('git commit -m "fix(receipt): handle null sku"', cwd=tempfile.mkdtemp(),
                            contains="no current branch")
